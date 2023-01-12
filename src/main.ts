@@ -1,3 +1,5 @@
+import "./style.css";
+
 const startEl = document.getElementById("start");
 const cancelEl = document.getElementById("cancel");
 
