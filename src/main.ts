@@ -10,6 +10,11 @@ const configEl = document.getElementById("config");
 const playingEl = document.getElementById("playing");
 const currentEl = document.getElementById("current");
 
+const repsDefault = window.localStorage.getItem("reps") ?? "15";
+const intervalDefault = window.localStorage.getItem("interval") ?? "3";
+repsEl.value = repsDefault;
+intervalEl.value = intervalDefault;
+
 const MOVES = {
   FRONT_LEFT: "Front left",
   FRONT_RIGHT: "Front right",
@@ -21,14 +26,30 @@ const MOVES = {
 
 type Move = keyof typeof MOVES;
 
-startEl?.addEventListener("click", () => {
+const MoveKeys = Object.keys(MOVES) as Move[];
+let availableMoves: Move[] = [];
+const setAvailableMoves = (reps: number) => {
+  MoveKeys.forEach((move) => {
+    for (let i = 0; i < Math.floor(reps / 5); i += 1) {
+      availableMoves.push(move);
+    }
+  });
+};
+
+const setLocalStorage = (reps: number, interval: number) => {
+  window.localStorage.setItem("reps", reps.toString());
+  window.localStorage.setItem("interval", interval.toString());
+};
+
+startEl?.addEventListener("click", async () => {
   const reps = parseInt(repsEl?.value);
-  const interval = parseInt(intervalEl?.value) * 1000;
-
-  loop(reps - 1, interval);
-
+  const interval = parseInt(intervalEl?.value);
+  setLocalStorage(reps, interval);
   configEl?.classList.add("hidden");
   playingEl?.classList.remove("hidden");
+  setAvailableMoves(reps);
+  await countdown();
+  loop(reps - 1, interval * 1000);
 });
 
 cancelEl?.addEventListener("click", () => {
@@ -37,6 +58,7 @@ cancelEl?.addEventListener("click", () => {
 
 const loop = async (reps: number, interval: number) => {
   const move = getRandomMove();
+
   await ghostSpeak(move);
 
   setTimeout(() => {
@@ -49,30 +71,62 @@ const loop = async (reps: number, interval: number) => {
 };
 
 const getRandomMove = (): Move => {
-  const rnd = Math.floor(Math.random() * 6);
-  const keys = Object.keys(MOVES) as Move[];
-  return keys[rnd];
+  const rnd = Math.floor(Math.random() * availableMoves.length);
+  console.log(rnd);
+  console.log(availableMoves);
+  const move = availableMoves[rnd];
+  availableMoves = [
+    ...availableMoves.slice(0, rnd),
+    ...availableMoves.slice(rnd + 1),
+  ];
+  console.log(availableMoves);
+
+  return move;
 };
 
 const synth = window.speechSynthesis;
 
-const ghostSpeak = async (move: Move) => {
+const speak = (text: string): Promise<void> => {
   return new Promise((resolve) => {
-    const currentMove = MOVES[move];
-    const speak = new SpeechSynthesisUtterance(currentMove);
+    const speak = new SpeechSynthesisUtterance(text);
+    if (currentEl) {
+      currentEl.innerText = text;
+    }
     speak.addEventListener("end", () => {
-      resolve("");
+      resolve();
     });
     synth.speak(speak);
-    if (currentEl) {
-      currentEl.innerText = currentMove;
-    }
   });
+};
+
+const ghostSpeak = async (move: Move) => {
+  const currentMove = MOVES[move];
+  await speak(currentMove);
 };
 
 const finish = () => {
   configEl?.classList.remove("hidden");
   playingEl?.classList.add("hidden");
+};
+
+const countdown = async (): Promise<void> => {
+  let count = 3;
+  let interval: number;
+
+  const decrease = async () => {
+    await speak(count.toString());
+    count -= 1;
+  };
+  await decrease();
+  return new Promise((resolve) => {
+    interval = setInterval(async () => {
+      if (count === 0) {
+        clearInterval(interval);
+        return resolve();
+      }
+      await decrease();
+    }, 1000);
+  });
 };
 
 export {};
