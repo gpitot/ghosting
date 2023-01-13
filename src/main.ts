@@ -27,7 +27,7 @@ const MoveKeys = Object.keys(MOVES) as Move[];
 let availableMoves: Move[] = [];
 const setAvailableMoves = (reps: number) => {
   MoveKeys.forEach((move) => {
-    for (let i = 0; i <= Math.min(1, Math.floor(reps / 5)); i += 1) {
+    for (let i = 0; i <= Math.max(1, Math.floor(reps / 5)); i += 1) {
       availableMoves.push(move);
     }
   });
