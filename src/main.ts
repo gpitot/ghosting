@@ -33,6 +33,8 @@ const setAvailableMoves = (reps: number) => {
   });
 };
 
+let lastMove: Move;
+
 const setLocalStorage = (reps: number, interval: number) => {
   window.localStorage.setItem("reps", reps.toString());
   window.localStorage.setItem("interval", interval.toString());
@@ -68,6 +70,11 @@ const getRandomMove = (): Move => {
   console.log(rnd);
   console.log(availableMoves);
   const move = availableMoves[rnd];
+  if (move === lastMove) {
+    console.log("same move again , try one more");
+    return getRandomMove();
+  }
+  lastMove = move;
   availableMoves = [
     ...availableMoves.slice(0, rnd),
     ...availableMoves.slice(rnd + 1),
