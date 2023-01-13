@@ -1,7 +1,4 @@
-import "./style.css";
-
 const startEl = document.getElementById("start");
-const cancelEl = document.getElementById("cancel");
 
 const repsEl = document.getElementById("reps") as HTMLInputElement;
 const intervalEl = document.getElementById("interval") as HTMLInputElement;
@@ -30,7 +27,7 @@ const MoveKeys = Object.keys(MOVES) as Move[];
 let availableMoves: Move[] = [];
 const setAvailableMoves = (reps: number) => {
   MoveKeys.forEach((move) => {
-    for (let i = 0; i < Math.floor(reps / 5); i += 1) {
+    for (let i = 0; i <= Math.min(1, Math.floor(reps / 5)); i += 1) {
       availableMoves.push(move);
     }
   });
@@ -50,10 +47,6 @@ startEl?.addEventListener("click", async () => {
   setAvailableMoves(reps);
   await countdown();
   loop(reps - 1, interval * 1000);
-});
-
-cancelEl?.addEventListener("click", () => {
-  window.location.reload();
 });
 
 const loop = async (reps: number, interval: number) => {
@@ -104,7 +97,8 @@ const ghostSpeak = async (move: Move) => {
   await speak(currentMove);
 };
 
-const finish = () => {
+const finish = async () => {
+  await speak("Finished session");
   configEl?.classList.remove("hidden");
   playingEl?.classList.add("hidden");
 };
