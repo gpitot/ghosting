@@ -23,14 +23,16 @@ const MOVES = {
 
 type Move = keyof typeof MOVES;
 
-try {
-  //@ts-ignore
-  await navigator.wakeLock.request("screen");
-  console.log("wake lock requested");
-} catch (err) {
-  console.log(err);
-  // if wake lock request fails - usually system related, such as battery
-}
+(async () => {
+  try {
+    //@ts-ignore
+    await navigator.wakeLock.request("screen");
+    console.log("wake lock requested");
+  } catch (err) {
+    console.log(err);
+    // if wake lock request fails - usually system related, such as battery
+  }
+})();
 
 const MoveKeys = Object.keys(MOVES) as Move[];
 let availableMoves: Move[] = [];
