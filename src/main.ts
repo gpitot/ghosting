@@ -8,7 +8,7 @@ const playingEl = document.getElementById("playing");
 const currentEl = document.getElementById("current");
 
 const repsDefault = window.localStorage.getItem("reps") ?? "15";
-const intervalDefault = window.localStorage.getItem("interval") ?? "3";
+const intervalDefault = window.localStorage.getItem("interval") ?? "2";
 repsEl.value = repsDefault;
 intervalEl.value = intervalDefault;
 
@@ -22,8 +22,6 @@ const MOVES = {
 } as const;
 
 type Move = keyof typeof MOVES;
-
-
 
 const MoveKeys = Object.keys(MOVES) as Move[];
 let availableMoves: Move[] = [];
@@ -44,7 +42,7 @@ const setLocalStorage = (reps: number, interval: number) => {
 
 startEl?.addEventListener("click", async () => {
   const reps = parseInt(repsEl?.value);
-  const interval = parseInt(intervalEl?.value);
+  const interval = parseFloat(intervalEl?.value);
   setLocalStorage(reps, interval);
   configEl?.classList.add("hidden");
   playingEl?.classList.remove("hidden");
@@ -53,24 +51,22 @@ startEl?.addEventListener("click", async () => {
   loop(reps - 1, interval * 1000);
 });
 
+const sleep = (ms: number): Promise<void> =>
+  new Promise<void>((resolve) => setTimeout(resolve, ms));
+
 const loop = async (reps: number, interval: number) => {
   const move = getRandomMove();
-
   await ghostSpeak(move);
-
-  setTimeout(() => {
-    if (reps === 0) {
-      finish();
-      return;
-    }
-    loop(reps - 1, interval);
-  }, interval);
+  if (reps === 0) {
+    finish();
+    return;
+  }
+  await sleep(interval);
+  loop(reps - 1, interval);
 };
 
 const getRandomMove = (): Move => {
   const rnd = Math.floor(Math.random() * availableMoves.length);
-  console.log(rnd);
-  console.log(availableMoves);
   const move = availableMoves[rnd];
   if (move === lastMove) {
     console.log("same move again , try one more");
@@ -81,7 +77,6 @@ const getRandomMove = (): Move => {
     ...availableMoves.slice(0, rnd),
     ...availableMoves.slice(rnd + 1),
   ];
-  console.log(availableMoves);
 
   return move;
 };
@@ -113,23 +108,12 @@ const finish = async () => {
 };
 
 const countdown = async (): Promise<void> => {
-  let count = 3;
-  let interval: number;
-
-  const decrease = async () => {
-    await speak(count.toString());
-    count -= 1;
-  };
-  await decrease();
-  return new Promise((resolve) => {
-    interval = setInterval(async () => {
-      if (count === 0) {
-        clearInterval(interval);
-        return resolve();
-      }
-      await decrease();
-    }, 1000);
-  });
+  await speak("Starting in 3");
+  await sleep(500);
+  await speak("2");
+  await sleep(500);
+  await speak("1");
+  await sleep(500);
 };
 
 export {};

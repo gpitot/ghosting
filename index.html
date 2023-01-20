@@ -22,14 +22,18 @@
             />
           </div>
           <div class="my-2 flex flex-col items-start">
-            <label for="interval">What interval? (in seconds)</label>
-            <input
-              type="number"
+            <label for="interval">What speed?</label>
+            <select
               id="interval"
-              value="2"
               class="p-2 mt-1 w-full"
-              min="1"
-            />
+              style="appearance: none"
+            >
+              <option value="0.5">Impossible</option>
+              <option value="1">Professional</option>
+              <option value="1.5">Club champion</option>
+              <option value="2">Standard</option>
+              <option value="3">Slow</option>
+            </select>
           </div>
           <div class="my-2 flex flex-col items-start">
             <button class="w-full bg-purple-700 font-bold" id="start">
